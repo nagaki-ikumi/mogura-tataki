@@ -1,0 +1,708 @@
+/* =========================================================
+   もぐら叩き - スタイル
+   ダークネイビー × シアンのスタイリッシュなデザイン
+   ========================================================= */
+
+/* ---------- カラー・共通変数 ---------- */
+:root {
+  --bg: #0a1330;          /* 濃いネイビー */
+  --bg-deep: #060c22;     /* さらに濃いネイビー */
+  --panel: rgba(255, 255, 255, 0.04);
+  --line: rgba(56, 214, 255, 0.18);
+  --cyan: #22d3ee;        /* メインのシアン */
+  --cyan-bright: #5ff1ff;
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.62);
+  --danger: #ff4d74;      /* 残り5秒の強調色 */
+
+  /* もぐらの色 */
+  --mole-dark: #6b4128;
+  --mole: #93603d;
+  --mole-light: #e7c29c;
+  --nose: #ff7f9e;
+
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+          "Yu Gothic", "Meiryo", system-ui, -apple-system, sans-serif;
+  --font-num: "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto,
+              system-ui, -apple-system, sans-serif;
+}
+
+/* ---------- リセット＆スマホ操作の最適化 ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;                  /* 画面スクロールさせない */
+  overscroll-behavior: none;         /* 引っ張りスクロール・更新を抑止 */
+}
+
+body {
+  position: fixed;                   /* iOS Safariのバウンススクロール対策 */
+  inset: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent; /* タップ時の青い枠を消す */
+  -webkit-touch-callout: none;               /* 長押しメニューを出さない */
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;                /* ダブルタップズーム防止 */
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ---------- アプリ全体・背景 ---------- */
+#app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(34, 211, 238, 0.14), transparent 60%),
+    radial-gradient(90% 50% at 50% 110%, rgba(34, 211, 238, 0.10), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+}
+
+/* うっすらとしたグリッド模様で奥行きを出す */
+#app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+  pointer-events: none;
+}
+
+/* ---------- 画面切り替え ---------- */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    calc(env(safe-area-inset-right) + 20px)
+    calc(env(safe-area-inset-bottom) + 24px)
+    calc(env(safe-area-inset-left) + 20px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s;
+}
+
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s;
+}
+
+/* スタート・結果画面は小さい端末でもはみ出したら縦スクロールできるように */
+#start-screen,
+#result-screen {
+  overflow-y: auto;
+}
+
+/* ---------- 共通ボタン ---------- */
+.btn-primary {
+  display: block;
+  width: min(100%, 340px);
+  min-height: 64px;                   /* 指で押しやすい大きさ */
+  padding: 18px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--cyan-bright), var(--cyan) 55%, #0ea5e9);
+  color: #04142b;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  box-shadow:
+    0 10px 30px rgba(34, 211, 238, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+}
+
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 4px 14px rgba(34, 211, 238, 0.35);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* =========================================================
+   スタート画面
+   ========================================================= */
+.start-inner {
+  width: 100%;
+  max-width: 420px;
+  margin: auto;                       /* 縦方向中央（はみ出し時も上が切れない） */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* 「今日作るゲーム」ラベル */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--cyan);
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.eyebrow-line {
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: var(--cyan);
+  border-radius: 2px;
+  opacity: 0.8;
+}
+
+/* ゲームタイトル */
+.title {
+  font-size: clamp(44px, 14vw, 64px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  margin-bottom: clamp(28px, 6vh, 48px);
+  text-shadow: 0 4px 30px rgba(34, 211, 238, 0.25);
+}
+
+/* キャッチコピー */
+.catch {
+  font-size: clamp(30px, 9vw, 40px);
+  font-weight: 900;
+  line-height: 1.35;
+  margin-bottom: 22px;
+}
+
+.accent {
+  color: var(--cyan);
+  text-shadow: 0 0 24px rgba(34, 211, 238, 0.45);
+}
+
+/* 説明文 */
+.desc {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.9;
+  margin-bottom: clamp(32px, 7vh, 56px);
+}
+
+.best-mini {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  font-family: var(--font-num);
+}
+
+.best-mini span {
+  color: var(--cyan);
+  font-weight: 900;
+}
+
+/* =========================================================
+   ゲーム画面
+   ========================================================= */
+#game-screen {
+  justify-content: flex-start;
+  gap: clamp(20px, 4vh, 36px);
+}
+
+/* 上部の TIME / SCORE */
+.hud {
+  width: 100%;
+  max-width: 440px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: clamp(0px, 2vh, 24px);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 8px 12px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.stat-label {
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: var(--cyan);
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-family: var(--font-num);
+  font-size: clamp(44px, 13vw, 60px);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* スコア加算時のポップ */
+.stat-value.bump {
+  animation: bump 0.2s ease;
+}
+
+@keyframes bump {
+  50% { transform: scale(1.18); color: var(--cyan-bright); }
+}
+
+/* 残り5秒の強調表示 */
+.stat.warning {
+  border-color: rgba(255, 77, 116, 0.7);
+  background: rgba(255, 77, 116, 0.1);
+}
+
+.stat.warning .stat-label {
+  color: var(--danger);
+}
+
+.stat.warning .stat-value {
+  color: var(--danger);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  20%      { transform: scale(1.2); text-shadow: 0 0 24px rgba(255, 77, 116, 0.8); }
+}
+
+/* ---------- ゲーム盤 ---------- */
+.board {
+  /* 画面幅と高さの両方を見て、縦長スマホで最大サイズにする */
+  width: min(100%, 440px, 60vh);
+  width: min(100%, 440px, 60dvh);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 3vw, 16px);
+  touch-action: none;                 /* 盤面ではスクロール・ズームを一切させない */
+}
+
+/* 1マス（ボタン全体がタップ判定なので当てやすい） */
+.hole {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(56, 214, 255, 0.12);
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* aspect-ratio 非対応の古いブラウザ向け保険 */
+@supports not (aspect-ratio: 1 / 1) {
+  .hole { height: 0; padding-bottom: 100%; }
+}
+
+/* 穴（立体感のある楕円） */
+.pit {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  bottom: 12%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, #01040d 0%, #040a1c 55%, #0d1a3d 100%);
+  box-shadow:
+    inset 0 8px 14px rgba(0, 0, 0, 0.9),
+    0 2px 0 rgba(56, 214, 255, 0.35),
+    0 0 20px rgba(34, 211, 238, 0.12);
+}
+
+/* もぐらが見える窓（穴の中心より下は隠れる） */
+.mole-window {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 0;
+  bottom: 27%;                        /* 穴の中心ライン */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 穴の手前のフチ（もぐらの前に重ねて「穴から出ている」感を出す） */
+.pit-front {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  bottom: 12%;
+  height: 15%;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: linear-gradient(180deg, #0a1533, #081029);
+  border-bottom: 2px solid rgba(56, 214, 255, 0.35);
+  pointer-events: none;
+}
+
+/* ---------- もぐら本体（CSSキャラクター） ---------- */
+.mole {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -6%;
+  height: 90%;
+  border-radius: 50% 50% 44% 44% / 58% 58% 42% 42%;
+  background: radial-gradient(circle at 38% 28%, #b27a52 0%, var(--mole) 45%, var(--mole-dark) 100%);
+  box-shadow: inset 0 -6px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(110%);        /* 普段は穴の中に隠れている */
+  transition: transform 0.14s ease-in; /* 引っ込むアニメーション */
+  will-change: transform;
+}
+
+/* 出現：下から「ポンッ」と飛び出す（少しオーバーシュート） */
+.hole.up .mole {
+  transform: translateY(0);
+  transition: transform 0.2s cubic-bezier(0.34, 1.7, 0.64, 1);
+}
+
+/* 耳 */
+.ear {
+  position: absolute;
+  top: 2%;
+  width: 22%;
+  height: 22%;
+  border-radius: 50%;
+  background: var(--mole-dark);
+}
+.ear::after {
+  content: "";
+  position: absolute;
+  inset: 25%;
+  border-radius: 50%;
+  background: #d98a8a;
+}
+.ear.left  { left: 6%; }
+.ear.right { right: 6%; }
+
+/* 目 */
+.eye {
+  position: absolute;
+  top: 30%;
+  width: 12%;
+  height: 14%;
+  border-radius: 50%;
+  background: #120a05;
+  transition: height 0.08s ease, top 0.08s ease;
+}
+.eye::after {                         /* 目のハイライト */
+  content: "";
+  position: absolute;
+  top: 18%;
+  left: 22%;
+  width: 38%;
+  height: 34%;
+  border-radius: 50%;
+  background: #fff;
+}
+.eye.left  { left: 27%; }
+.eye.right { right: 27%; }
+
+/* ほっぺ */
+.cheek {
+  position: absolute;
+  top: 48%;
+  width: 16%;
+  height: 9%;
+  border-radius: 50%;
+  background: rgba(255, 128, 150, 0.55);
+}
+.cheek.left  { left: 11%; }
+.cheek.right { right: 11%; }
+
+/* 口まわり */
+.muzzle {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 46%;
+  height: 32%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #f6dcc0, var(--mole-light));
+}
+
+/* 鼻 */
+.nose {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  width: 40%;
+  height: 34%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffb3c4, var(--nose) 60%, #e0567a);
+}
+
+/* 前歯 */
+.teeth {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26%;
+  height: 28%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 0 0 4px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.teeth::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* 叩かれた時：目がギュッとつぶれる＆ぷるっと震える */
+.hole.hit .eye {
+  top: 35%;
+  height: 3%;
+  border-radius: 2px;
+}
+.hole.hit .eye::after {
+  display: none;
+}
+.hole.hit .mole-face {
+  animation: squash 0.16s ease;
+}
+
+.mole-face {
+  position: absolute;
+  inset: 0;
+}
+
+@keyframes squash {
+  0%   { transform: scale(1, 1); }
+  40%  { transform: scale(1.12, 0.86) translateY(6%); }
+  100% { transform: scale(1, 1); }
+}
+
+/* ---------- タップ演出 ---------- */
+
+/* 叩いた穴に広がるリング */
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 70%;
+  height: 70%;
+  margin: -35% 0 0 -35%;
+  border-radius: 50%;
+  border: 3px solid var(--cyan-bright);
+  box-shadow: 0 0 18px rgba(95, 241, 255, 0.7);
+  pointer-events: none;
+  animation: burst 0.35s ease-out forwards;
+}
+
+@keyframes burst {
+  0%   { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* 「+1」が浮かんで消える */
+.plus-one {
+  position: fixed;
+  z-index: 50;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-num);
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--cyan-bright);
+  text-shadow: 0 0 14px rgba(34, 211, 238, 0.9), 0 2px 0 #04142b;
+  pointer-events: none;
+  animation: float-up 0.6s ease-out forwards;
+}
+
+@keyframes float-up {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.6); }
+  20%  { opacity: 1; transform: translate(-50%, -70%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -190%) scale(1); }
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+}
+
+/* 終了時の「TIME UP」 */
+.timeup {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-num);
+  font-size: clamp(48px, 16vw, 80px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  text-shadow: 0 0 40px rgba(34, 211, 238, 0.6);
+  background: rgba(6, 12, 34, 0.72);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.timeup.show {
+  visibility: visible;
+  pointer-events: auto;              /* 終了直後の連打を受け止める */
+  animation: timeup-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes timeup-in {
+  0%   { opacity: 0; transform: scale(1.4); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* =========================================================
+   結果画面
+   ========================================================= */
+.result-inner {
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.result-title {
+  font-family: var(--font-num);
+  font-size: clamp(44px, 14vw, 60px);
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: var(--cyan);
+  text-shadow: 0 0 30px rgba(34, 211, 238, 0.4);
+  margin-bottom: clamp(24px, 5vh, 44px);
+}
+
+.result-label {
+  font-size: 18px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.result-score {
+  font-family: var(--font-num);
+  font-size: clamp(88px, 30vw, 128px);
+  font-weight: 900;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.result-score .unit,
+.best-value .unit {
+  font-family: var(--font);
+  font-size: 0.32em;
+  margin-left: 6px;
+}
+
+/* NEW RECORD バッジ */
+.new-record {
+  margin-top: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.14);
+  border: 1px solid var(--cyan);
+  color: var(--cyan-bright);
+  font-family: var(--font-num);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  visibility: hidden;
+}
+
+.new-record.show {
+  visibility: visible;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ハイスコア */
+.best-box {
+  width: min(100%, 340px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: clamp(24px, 5vh, 40px) 0;
+  padding: 16px 24px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.best-label {
+  font-family: var(--font-num);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: var(--cyan);
+}
+
+.best-value {
+  font-family: var(--font-num);
+  font-size: 36px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 画面が低い端末（iPhone SEなど）の微調整 ---------- */
+@media (max-height: 640px) {
+  .title { margin-bottom: 20px; }
+  .catch { margin-bottom: 14px; }
+  .desc  { margin-bottom: 24px; }
+  #game-screen { gap: 14px; }
+  .stat { padding: 10px 8px 8px; }
+}
+
+/* 動きを減らす設定の人向け */
+@media (prefers-reduced-motion: reduce) {
+  .screen { transition: none; }
+  .stat.warning .stat-value,
+  .new-record.show { animation: none; }
+}

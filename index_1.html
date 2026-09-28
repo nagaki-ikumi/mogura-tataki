@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- スマホ最適化：拡大縮小を禁止し、ノッチ領域まで使う -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1330">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title>もぐら叩き</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ========== スタート画面 ========== -->
+    <section id="start-screen" class="screen active" aria-label="スタート画面">
+      <div class="start-inner">
+        <p class="eyebrow"><span class="eyebrow-line"></span>今日作るゲーム<span class="eyebrow-line"></span></p>
+
+        <h1 class="title">もぐら叩き</h1>
+
+        <p class="catch">
+          <span class="accent">30秒</span>で、<br>
+          何点取れるか
+        </p>
+
+        <p class="desc">
+          3×3の穴からランダムに現れる<br>
+          もぐらをタップし、得点を増やす。
+        </p>
+
+        <button id="start-btn" class="btn-primary" type="button">ゲームスタート</button>
+
+        <p class="best-mini">BEST <span id="start-best">0</span>点</p>
+      </div>
+    </section>
+
+    <!-- ========== ゲーム画面 ========== -->
+    <section id="game-screen" class="screen" aria-label="ゲーム画面">
+      <!-- 上部：残り時間とスコア -->
+      <header class="hud">
+        <div id="time-box" class="stat">
+          <span class="stat-label">TIME</span>
+          <span id="time-value" class="stat-value">30</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">SCORE</span>
+          <span id="score-value" class="stat-value">0</span>
+        </div>
+      </header>
+
+      <!-- 3×3のゲーム盤（穴は script.js で生成） -->
+      <div id="board" class="board" aria-label="ゲーム盤"></div>
+
+      <p class="hint">もぐらをタップ！</p>
+
+      <!-- 終了時に一瞬表示する「TIME UP」 -->
+      <div id="timeup" class="timeup" aria-hidden="true">TIME UP</div>
+    </section>
+
+    <!-- ========== 結果画面 ========== -->
+    <section id="result-screen" class="screen" aria-label="結果画面">
+      <div class="result-inner">
+        <p class="result-title">RESULT</p>
+
+        <p class="result-label">あなたのスコア</p>
+        <p class="result-score"><span id="result-score">0</span><span class="unit">点</span></p>
+
+        <p id="new-record" class="new-record">NEW RECORD!</p>
+
+        <div class="best-box">
+          <span class="best-label">BEST</span>
+          <span class="best-value"><span id="best-score">0</span><span class="unit">点</span></span>
+        </div>
+
+        <button id="retry-btn" class="btn-primary" type="button">もう一度遊ぶ</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
